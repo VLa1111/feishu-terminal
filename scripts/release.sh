@@ -49,7 +49,7 @@ for pair in linux/amd64 linux/arm64; do
     go build -trimpath -ldflags "$LDFLAGS" -o "$stage/feishu-terminal" .
 
   cp README.md .env.sample "$stage/"
-  cp zsh/.zshrc "$stage/zsh/.zshrc"
+  cp zsh/.zshrc zsh/.zshenv "$stage/zsh/"
   cp deploy/install.sh "$stage/install.sh"
   cp deploy/feishu-terminal.service "$stage/deploy/feishu-terminal.service"
   chmod 0755 "$stage/feishu-terminal" "$stage/install.sh"

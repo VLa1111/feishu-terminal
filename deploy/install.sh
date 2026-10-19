@@ -37,7 +37,7 @@ done
 
 install -d -m 0755 "$PREFIX" "$PREFIX/zsh"
 install -m 0755 feishu-terminal "$PREFIX/feishu-terminal"
-install -m 0644 zsh/.zshrc "$PREFIX/zsh/.zshrc"
+install -m 0644 zsh/.zshrc zsh/.zshenv "$PREFIX/zsh/"
 
 # 首次安装生成 .env；升级时保留已有配置。
 if [ -f .env.sample ] && [ ! -f "$PREFIX/.env" ]; then

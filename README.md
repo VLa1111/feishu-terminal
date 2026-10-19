@@ -67,7 +67,7 @@ go build -o feishu-terminal .
 
 日志出现 `connected to wss://...` 即连接成功。
 
-> 终端美化依赖 `zsh`（默认 `/bin/zsh`）与 oh-my-zsh（可选，装了才加载）。bot 专用配置在 `zsh/.zshrc`，可按需调整提示符样式。
+> 终端美化依赖 `zsh`（默认 `/bin/zsh`）与 oh-my-zsh（可选，装了才加载）。bot 专用配置在 `zsh/.zshrc`（提示符样式）和 `zsh/.zshenv`（跳过系统级 compinit，避免补全目录权限异常时 shell 卡在交互提问）。
 
 ### 打包与部署到新服务器
 

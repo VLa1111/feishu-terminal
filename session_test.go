@@ -64,7 +64,10 @@ func TestSessionStatePersistence(t *testing.T) {
 
 func TestJobExitCodeAndLongOutput(t *testing.T) {
 	m := testManager(t)
-	s, _ := m.GetOrCreate("chat-2")
+	s, err := m.GetOrCreate("chat-2")
+	if err != nil {
+		t.Fatalf("GetOrCreate: %v", err)
+	}
 
 	out, code := mustRun(t, s, "(exit 3)", 8*time.Second)
 	if code != 3 {
@@ -91,7 +94,10 @@ func TestJobExitCodeAndLongOutput(t *testing.T) {
 
 func TestInteractiveInput(t *testing.T) {
 	m := testManager(t)
-	s, _ := m.GetOrCreate("chat-3")
+	s, err := m.GetOrCreate("chat-3")
+	if err != nil {
+		t.Fatalf("GetOrCreate: %v", err)
+	}
 
 	job, err := s.Run("read x; echo GOT:$x")
 	if err != nil {
@@ -121,7 +127,10 @@ func TestInteractiveInput(t *testing.T) {
 
 func TestRawModeAndCtrlC(t *testing.T) {
 	m := testManager(t)
-	s, _ := m.GetOrCreate("chat-4")
+	s, err := m.GetOrCreate("chat-4")
+	if err != nil {
+		t.Fatalf("GetOrCreate: %v", err)
+	}
 
 	if err := s.RunRaw("sleep 30"); err != nil {
 		t.Fatalf("RunRaw: %v", err)
@@ -151,7 +160,10 @@ func TestRawModeAndCtrlC(t *testing.T) {
 
 func TestResetKillsSession(t *testing.T) {
 	m := testManager(t)
-	s, _ := m.GetOrCreate("chat-5")
+	s, err := m.GetOrCreate("chat-5")
+	if err != nil {
+		t.Fatalf("GetOrCreate: %v", err)
+	}
 	mustRun(t, s, "echo alive", 8*time.Second)
 
 	m.Close("chat-5")
