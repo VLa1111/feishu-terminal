@@ -157,6 +157,8 @@ func (s *Session) ensureLocked() error {
 	}
 	_, _ = s.tmux("set-option", "-g", "history-limit", "50000")
 	// 等 shell 把提示符画出来，避免第一条命令打在未初始化的终端上。
+	// 超时说明 shell 没起来（zsh 缺失、zshrc 报错等），必须报错而不是静默放行，
+	// 否则后续每条命令都会以「当前有命令正在运行」失败，掩盖真正的原因。
 	deadline := time.Now().Add(8 * time.Second)
 	for time.Now().Before(deadline) {
 		if s.atPromptLocked() {
@@ -164,7 +166,11 @@ func (s *Session) ensureLocked() error {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	return nil
+	snap, capErr := s.captureLocked(40)
+	if capErr != nil {
+		return fmt.Errorf("shell 启动失败（会话 %s，ZDOTDIR=%s）: %v", s.name, s.zshDir, capErr)
+	}
+	return fmt.Errorf("shell 在 8s 内没有出现提示符（会话 %s，ZDOTDIR=%s），最后画面:\n%s", s.name, s.zshDir, snap)
 }
 
 func (s *Session) kill() {
@@ -216,9 +222,14 @@ func (s *Session) busyLocked() bool {
 	return !s.atPromptLocked()
 }
 
+// captureLocked 抓取终端最后 lines 行。调用方必须已持有 s.mu。
+func (s *Session) captureLocked(lines int) (string, error) {
+	return s.tmux("capture-pane", "-p", "-J", "-t", s.name, "-S", fmt.Sprintf("-%d", lines))
+}
+
 // atPromptLocked 看最后一行是否以哨兵结尾。
 func (s *Session) atPromptLocked() bool {
-	out, err := s.tmux("capture-pane", "-p", "-J", "-t", s.name, "-S", "-40")
+	out, err := s.captureLocked(40)
 	if err != nil {
 		return false
 	}
