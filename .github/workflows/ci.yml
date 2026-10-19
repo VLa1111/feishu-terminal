@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # 会话相关的测试需要真实 tmux 与 zsh
+      - name: Install runtime deps
+        run: sudo apt-get update && sudo apt-get install -y tmux zsh
+
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "以下文件未格式化，请运行 gofmt -w .："
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: vet
+        run: go vet ./...
+
+      - name: test
+        run: go test -count=1 ./...
+
+      - name: build
+        run: CGO_ENABLED=0 go build -trimpath -o /tmp/feishu-terminal .

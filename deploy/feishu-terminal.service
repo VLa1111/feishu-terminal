@@ -1,0 +1,24 @@
+[Unit]
+Description=Feishu terminal bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@PREFIX@
+EnvironmentFile=@PREFIX@/.env
+ExecStart=@PREFIX@/feishu-terminal
+User=@RUN_USER@
+Restart=always
+RestartSec=3
+
+# tmux 服务是 bot 的子进程。默认的 control-group 会在 systemctl restart/stop 时
+# 把整个 cgroup 都杀掉，连 tmux 里正在跑的任务和 shell 一起没。
+# 只杀主进程，tmux 会话就能跨重启保留（/upgrade 的 exec 重启本来就不受影响）。
+KillMode=process
+
+# 终端里跑 zsh / tmux，给足文件句柄。
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

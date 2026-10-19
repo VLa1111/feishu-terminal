@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # 创建 Release 并上传产物
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install runtime deps
+        run: sudo apt-get update && sudo apt-get install -y tmux zsh
+
+      - name: Test
+        run: go test -count=1 ./...
+
+      # 产物：两个架构的部署包 + 裸二进制 + release.json + SHA256SUMS
+      - name: Build release artifacts
+        run: make dist VERSION="${GITHUB_REF_NAME#v}"
+
+      # release.json 里的构件地址是相对路径，因此
+      #   https://github.com/<owner>/<repo>/releases/latest/download/release.json
+      # 能直接作为 FEISHU_UPDATE_URL 使用。
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            dist/*.tar.gz \
+            dist/feishu-terminal-linux-* \
+            dist/release.json \
+            dist/SHA256SUMS \
+            --title "feishu-terminal ${GITHUB_REF_NAME#v}" \
+            --generate-notes

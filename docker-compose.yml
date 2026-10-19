@@ -1,0 +1,12 @@
+services:
+  feishu-terminal:
+    build: .
+    image: feishu-terminal:latest
+    container_name: feishu-terminal
+    restart: unless-stopped
+    # 配置从宿主机 .env 注入容器，不写进镜像层（保密）
+    env_file:
+      - .env
+    # 长连接模式：进程主动连出到飞书，无需映射任何端口
+    environment:
+      - TZ=Asia/Shanghai

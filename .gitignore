@@ -1,0 +1,19 @@
+# 构建产物
+/feishu-terminal
+/dist/
+*.test
+
+# 运行时数据
+/logs/
+/.env
+*.rollback
+*.rollback.tmp
+*.bak.*
+
+# macOS / 网络共享元数据
+.DS_Store
+._*
+.AppleDouble
+
+# zsh 缓存
+zsh/.zcompdump*
